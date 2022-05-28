@@ -62,6 +62,11 @@ constructor(
             shortcut.name = name
         }
 
+    fun setRoom(room: String): Completable =
+        commitTransactionForShortcut { shortcut ->
+            shortcut.room = room
+        }
+
     fun setDescription(description: String): Completable =
         commitTransactionForShortcut { shortcut ->
             shortcut.description = description

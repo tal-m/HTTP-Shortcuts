@@ -11,17 +11,7 @@ import android.widget.ImageView
 import androidx.activity.result.launch
 import androidx.core.app.ActivityCompat
 import androidx.core.net.toUri
-import ch.rmy.android.framework.extensions.attachTo
-import ch.rmy.android.framework.extensions.finishWithoutAnimation
-import ch.rmy.android.framework.extensions.logException
-import ch.rmy.android.framework.extensions.logInfo
-import ch.rmy.android.framework.extensions.runFor
-import ch.rmy.android.framework.extensions.runIf
-import ch.rmy.android.framework.extensions.runIfNotNull
-import ch.rmy.android.framework.extensions.showToast
-import ch.rmy.android.framework.extensions.startActivity
-import ch.rmy.android.framework.extensions.takeUnlessEmpty
-import ch.rmy.android.framework.extensions.truncate
+import ch.rmy.android.framework.extensions.*
 import ch.rmy.android.framework.ui.BaseIntentBuilder
 import ch.rmy.android.framework.ui.Entrypoint
 import ch.rmy.android.framework.utils.DateUtil
@@ -39,38 +29,19 @@ import ch.rmy.android.http_shortcuts.data.enums.ParameterType
 import ch.rmy.android.http_shortcuts.data.enums.ShortcutExecutionType
 import ch.rmy.android.http_shortcuts.data.models.ResponseHandlingModel
 import ch.rmy.android.http_shortcuts.data.models.ShortcutModel
-import ch.rmy.android.http_shortcuts.exceptions.BrowserNotFoundException
-import ch.rmy.android.http_shortcuts.exceptions.CanceledByUserException
-import ch.rmy.android.http_shortcuts.exceptions.InvalidUrlException
-import ch.rmy.android.http_shortcuts.exceptions.MissingLocationPermissionException
-import ch.rmy.android.http_shortcuts.exceptions.ResumeLaterException
-import ch.rmy.android.http_shortcuts.exceptions.UnsupportedFeatureException
-import ch.rmy.android.http_shortcuts.exceptions.UserException
+import ch.rmy.android.http_shortcuts.exceptions.*
 import ch.rmy.android.http_shortcuts.extensions.cancel
 import ch.rmy.android.http_shortcuts.extensions.loadImage
 import ch.rmy.android.http_shortcuts.extensions.type
-import ch.rmy.android.http_shortcuts.http.CookieManager
-import ch.rmy.android.http_shortcuts.http.ErrorResponse
-import ch.rmy.android.http_shortcuts.http.FileUploadManager
-import ch.rmy.android.http_shortcuts.http.HttpRequester
-import ch.rmy.android.http_shortcuts.http.ResponseFileStorage
-import ch.rmy.android.http_shortcuts.http.ShortcutResponse
+import ch.rmy.android.http_shortcuts.http.*
+import ch.rmy.android.http_shortcuts.matrix.MatrixShortcutClient
 import ch.rmy.android.http_shortcuts.plugin.SessionMonitor
 import ch.rmy.android.http_shortcuts.scheduling.ExecutionScheduler
 import ch.rmy.android.http_shortcuts.scheduling.ExecutionsWorker
 import ch.rmy.android.http_shortcuts.scripting.ScriptExecutor
 import ch.rmy.android.http_shortcuts.scripting.actions.ActionFactory
-import ch.rmy.android.http_shortcuts.utils.DialogBuilder
-import ch.rmy.android.http_shortcuts.utils.ErrorFormatter
+import ch.rmy.android.http_shortcuts.utils.*
 import ch.rmy.android.http_shortcuts.utils.FileTypeUtil.isImage
-import ch.rmy.android.http_shortcuts.utils.FileUtil
-import ch.rmy.android.http_shortcuts.utils.HTMLUtil
-import ch.rmy.android.http_shortcuts.utils.IntentUtil
-import ch.rmy.android.http_shortcuts.utils.NetworkUtil
-import ch.rmy.android.http_shortcuts.utils.ProgressIndicator
-import ch.rmy.android.http_shortcuts.utils.Settings
-import ch.rmy.android.http_shortcuts.utils.Validation
-import ch.rmy.android.http_shortcuts.utils.WifiUtil
 import ch.rmy.android.http_shortcuts.variables.VariableManager
 import ch.rmy.android.http_shortcuts.variables.VariableResolver
 import ch.rmy.android.http_shortcuts.variables.Variables
@@ -83,7 +54,6 @@ import io.reactivex.schedulers.Schedulers
 import okhttp3.CookieJar
 import java.io.IOException
 import java.net.UnknownHostException
-import java.util.HashMap
 import javax.inject.Inject
 import kotlin.math.pow
 
@@ -112,6 +82,9 @@ class ExecuteActivity : BaseActivity(), Entrypoint {
 
     @Inject
     lateinit var httpRequester: HttpRequester
+
+    @Inject
+    lateinit var matrixClient: MatrixShortcutClient
 
     private lateinit var shortcut: ShortcutModel
     private lateinit var globalCode: String
@@ -161,13 +134,14 @@ class ExecuteActivity : BaseActivity(), Entrypoint {
             finishWithoutAnimation()
         }
     }
-    private val openCamera = registerForActivityResult(FilePickerUtil.OpenCamera) { resultCallback ->
-        resultCallback?.invoke(this)
-            ?.let { file ->
-                resumeAfterFileRequest(fileUris = listOf(file))
-            }
-            ?: finishWithoutAnimation()
-    }
+    private val openCamera =
+        registerForActivityResult(FilePickerUtil.OpenCamera) { resultCallback ->
+            resultCallback?.invoke(this)
+                ?.let { file ->
+                    resumeAfterFileRequest(fileUris = listOf(file))
+                }
+                ?: finishWithoutAnimation()
+        }
 
     /* Caches / State */
     private var fileUploadManager: FileUploadManager? = null
@@ -284,7 +258,8 @@ class ExecuteActivity : BaseActivity(), Entrypoint {
                             rescheduleExecution()
                                 .andThen(executionScheduler.schedule())
                         } else {
-                            val simple = shortcut.responseHandling?.failureOutput == ResponseHandlingModel.FAILURE_OUTPUT_SIMPLE
+                            val simple =
+                                shortcut.responseHandling?.failureOutput == ResponseHandlingModel.FAILURE_OUTPUT_SIMPLE
                             displayOutput(
                                 generateOutputFromError(error, simple),
                                 response = (error as? ErrorResponse)?.shortcutResponse
@@ -429,7 +404,10 @@ class ExecuteActivity : BaseActivity(), Entrypoint {
         return if (fileRequest == null) {
             executeWithActions()
         } else {
-            openFilePickerForFileParameter(multiple = fileRequest.multiple, image = fileRequest.image)
+            openFilePickerForFileParameter(
+                multiple = fileRequest.multiple,
+                image = fileRequest.image
+            )
         }
     }
 
@@ -448,7 +426,9 @@ class ExecuteActivity : BaseActivity(), Entrypoint {
         }
 
     private fun checkWifiNetworkSsid(): Completable =
-        if (shortcut.wifiSsid.isEmpty() || WifiUtil.getCurrentSsid(context).orEmpty() == shortcut.wifiSsid) {
+        if (shortcut.wifiSsid.isEmpty() || WifiUtil.getCurrentSsid(context)
+            .orEmpty() == shortcut.wifiSsid
+        ) {
             Completable.fromAction {
                 finishActivityIfNeeded()
             }
@@ -488,7 +468,11 @@ class ExecuteActivity : BaseActivity(), Entrypoint {
     }
 
     private fun showRequestPermissionRationalIfNeeded(): Completable =
-        if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.ACCESS_FINE_LOCATION)) {
+        if (ActivityCompat.shouldShowRequestPermissionRationale(
+                this,
+                Manifest.permission.ACCESS_FINE_LOCATION
+            )
+        ) {
             Completable.defer {
                 DialogBuilder(context)
                     .title(getString(R.string.title_permission_dialog))
@@ -546,6 +530,7 @@ class ExecuteActivity : BaseActivity(), Entrypoint {
                 when (shortcut.type) {
                     ShortcutExecutionType.APP -> executeShortcut()
                     ShortcutExecutionType.BROWSER -> openShortcutInBrowser()
+                    ShortcutExecutionType.MATRIX -> executeMatrixShortcut()
                     else -> Completable.complete()
                 }
             )
@@ -578,6 +563,59 @@ class ExecuteActivity : BaseActivity(), Entrypoint {
 
     private fun injectVariables(string: String): String =
         Variables.rawPlaceholdersToResolvedValues(string, variableManager.getVariableValuesByIds())
+
+    private fun executeMatrixShortcut(): Completable =
+        matrixClient.executeShortcut(
+            context,
+            shortcut,
+            variableManager,
+            ResponseFileStorage(context, shortcutId),
+            fileUploadManager,
+        ).observeOn(AndroidSchedulers.mainThread())
+            .onErrorResumeNext { error ->
+                if (error is ErrorResponse || error is IOException) {
+                    scriptExecutor
+                        .execute(
+                            script = shortcut.codeOnFailure,
+                            error = error as? Exception,
+                        )
+                        .subscribeOn(Schedulers.computation())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .andThen(Single.error(error))
+                } else {
+                    Single.error(error)
+                }
+            }
+            .flatMap { response ->
+                scriptExecutor
+                    .execute(
+                        script = shortcut.codeOnSuccess,
+                        response = response,
+                    )
+                    .subscribeOn(Schedulers.computation())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .toSingle { response }
+            }
+            .flatMapCompletable { response ->
+                when (shortcut.responseHandling?.successOutput) {
+                    ResponseHandlingModel.SUCCESS_OUTPUT_MESSAGE -> {
+                        displayOutput(
+                            output = shortcut.responseHandling
+                                ?.successMessage
+                                ?.takeUnlessEmpty()
+                                ?.let(::injectVariables)
+                                ?: String.format(getString(R.string.executed), shortcutName),
+                            response = response,
+                        )
+                    }
+                    ResponseHandlingModel.SUCCESS_OUTPUT_RESPONSE -> displayOutput(
+                        output = null,
+                        response
+                    )
+                    ResponseHandlingModel.SUCCESS_OUTPUT_NONE -> Completable.complete()
+                    else -> Completable.complete()
+                }
+            }
 
     private fun executeShortcut(): Completable =
         httpRequester
@@ -626,7 +664,10 @@ class ExecuteActivity : BaseActivity(), Entrypoint {
                             response = response,
                         )
                     }
-                    ResponseHandlingModel.SUCCESS_OUTPUT_RESPONSE -> displayOutput(output = null, response)
+                    ResponseHandlingModel.SUCCESS_OUTPUT_RESPONSE -> displayOutput(
+                        output = null,
+                        response
+                    )
                     ResponseHandlingModel.SUCCESS_OUTPUT_NONE -> Completable.complete()
                     else -> Completable.complete()
                 }
@@ -685,9 +726,10 @@ class ExecuteActivity : BaseActivity(), Entrypoint {
                             imageView.loadImage(response!!.contentFile!!, preventMemoryCache = true)
                             builder.view(imageView)
                         } else {
-                            val finalOutput = (output ?: response?.getContentAsString(context) ?: "")
-                                .ifBlank { getString(R.string.message_blank_response) }
-                                .let(HTMLUtil::format)
+                            val finalOutput =
+                                (output ?: response?.getContentAsString(context) ?: "")
+                                    .ifBlank { getString(R.string.message_blank_response) }
+                                    .let(HTMLUtil::format)
                             builder.message(finalOutput)
                         }
                     }

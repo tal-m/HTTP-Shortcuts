@@ -96,6 +96,24 @@
                 android:layout_marginBottom="4dp"
                 android:text="@string/section_basic_request" />
 
+            <TextView
+                style="@style/Label"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="16dp"
+                android:layout_marginRight="16dp"
+                android:text="@string/label_matrix_room" />
+
+            <EditText
+                android:id="@+id/input_shortcut_room"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="16dp"
+                android:layout_marginRight="16dp"
+                android:inputType="text"
+                app:subtitle="@string/label_matrix_room_instructions"
+                android:maxLines="1" />
+
             <include
                 android:id="@+id/divider_below_basic_request_settings"
                 layout="@layout/divider_line"

@@ -26,7 +26,7 @@ android {
         targetSdkVersion 32
         versionName '2.16.0'
         // 11,(2 digits major),(2 digits minor),(2 digits patch),(2 digits build)
-        versionCode 1102160001
+        versionCode 1102170001
         buildConfigField 'String', 'BUGSNAG_API_KEY', "\"${rootProject.ext.bugsnagAPIKey}\""
         buildConfigField 'String', 'BUILD_TIMESTAMP', "\"${rootProject.ext.buildTimestamp}\""
         multiDexEnabled true
@@ -116,6 +116,17 @@ android {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
+    flavorDimensions 'protocols'
+    productFlavors {
+        matrix {
+            dimension 'protocols'
+            applicationIdSuffix 'matrix'
+            minSdk 26
+        }
+        httpOnly {
+            dimension 'protocols'
+        }
+    }
 }
 
 if (!rootProject.ext.bugsnagAPIKey) {
@@ -130,6 +141,8 @@ if (!rootProject.ext.bugsnagAPIKey) {
 project.configure(project.android, {
     sourceSets {
         main.java.srcDirs += 'src/main/kotlin'
+        matrix.java.srcDirs += 'src/matrix/kotlin'
+        httpOnly.java.srcDirs += 'src/httpOnly/kotlin'
         test.java.srcDirs += 'src/test/kotlin'
         androidTest.java.srcDirs += 'src/androidTest/kotlin'
         debug.java.srcDirs += 'src/withoutCrashLogging/kotlin'
@@ -141,6 +154,14 @@ project.configure(project.android, {
 dependencies {
     implementation 'androidx.multidex:multidex:2.0.1'
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
+
+    /* Matrix */
+    matrixImplementation 'net.folivo:trixnity-client:2.0.0'
+    matrixImplementation 'net.folivo:trixnity-client-store-exposed:2.0.0'
+    matrixImplementation 'com.h2database:h2:2.1.212'
+    matrixImplementation 'org.jetbrains.kotlinx:kotlinx-coroutines-rx2:1.6.1'
+    matrixImplementation 'io.ktor:ktor-client-okhttp:2.0.1'
+    matrixImplementation 'ch.qos.logback:logback-classic:1.3.0-alpha15'
 
     /* Dependency Injection */
     implementation 'com.google.dagger:dagger:2.41'

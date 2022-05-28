@@ -12,7 +12,8 @@ enum class ShortcutExecutionType(
     APP(type = "app", usesUrl = true, requiresHttpUrl = true, usesRequestOptions = true, usesResponse = true),
     BROWSER(type = "browser", usesUrl = true, requiresHttpUrl = false),
     SCRIPTING(type = "scripting"),
-    TRIGGER(type = "trigger", usesScriptingEditor = false);
+    TRIGGER(type = "trigger", usesScriptingEditor = false),
+    MATRIX(type = "matrix", usesUrl = true, usesResponse = false, usesRequestOptions = true, usesScriptingEditor = false);
 
     companion object {
 

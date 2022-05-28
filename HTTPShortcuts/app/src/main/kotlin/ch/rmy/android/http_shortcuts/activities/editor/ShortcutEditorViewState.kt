@@ -13,6 +13,7 @@ data class ShortcutEditorViewState(
     val shortcutIcon: ShortcutIcon = ShortcutIcon.NoIcon,
     val shortcutName: String = "",
     val shortcutDescription: String = "",
+    val shortcutRoom: String = "",
     val isExecutable: Boolean = false,
     val hasChanges: Boolean = false,
     val requestBodyButtonEnabled: Boolean = false,

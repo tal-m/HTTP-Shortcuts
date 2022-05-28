@@ -116,6 +116,12 @@ class ShortcutEditorActivity : BaseActivity() {
                 viewModel.onShortcutDescriptionChanged(description.toString())
             }
             .attachTo(destroyer)
+        binding.inputShortcutRoom
+            .observeTextChanges()
+            .subscribe { room ->
+                viewModel.onShortcutRoomChanged(room.toString())
+            }
+            .attachTo(destroyer)
     }
 
     private fun initViewModelBindings() {
@@ -133,6 +139,8 @@ class ShortcutEditorActivity : BaseActivity() {
             binding.inputShortcutName.isEnabled = !viewState.isInputDisabled
             binding.inputDescription.setTextSafely(viewState.shortcutDescription)
             binding.inputDescription.isEnabled = !viewState.isInputDisabled
+            binding.inputShortcutRoom.setTextSafely(viewState.shortcutRoom)
+            binding.inputShortcutRoom.isVisible = type == ShortcutExecutionType.MATRIX
             binding.buttonBasicRequestSettings.isVisible = type.usesUrl
             binding.buttonBasicRequestSettings.isEnabled = !viewState.isInputDisabled
             binding.dividerBelowBasicRequestSettings.isVisible = type.usesUrl
@@ -156,6 +164,7 @@ class ShortcutEditorActivity : BaseActivity() {
             binding.buttonExecutionSettings.isEnabled = !viewState.isInputDisabled
             binding.dividerBelowScripting.isVisible = type.usesScriptingEditor || type == ShortcutExecutionType.TRIGGER
             binding.buttonBasicRequestSettings.setSubtitle(viewState.basicSettingsSubtitle)
+            binding.buttonHeaders.isVisible = type != ShortcutExecutionType.MATRIX
             binding.buttonHeaders.setSubtitle(viewState.headersSubtitle)
             binding.buttonRequestBody.setSubtitle(viewState.requestBodySettingsSubtitle)
             binding.buttonAuthentication.setSubtitle(viewState.authenticationSettingsSubtitle)

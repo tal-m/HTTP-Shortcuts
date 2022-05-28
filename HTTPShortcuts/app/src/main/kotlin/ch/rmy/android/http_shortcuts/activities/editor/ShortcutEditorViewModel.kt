@@ -186,6 +186,7 @@ class ShortcutEditorViewModel(
                         shortcutExecutionType = shortcut.type,
                         shortcutIcon = shortcut.icon,
                         shortcutName = shortcut.name,
+                        shortcutRoom = shortcut.room,
                         shortcutDescription = shortcut.description,
                         isExecutable = canExecute(),
                         hasChanges = hasChanges(),
@@ -216,6 +217,7 @@ class ShortcutEditorViewModel(
             ShortcutExecutionType.BROWSER -> StringResLocalizable(R.string.subtitle_editor_toolbar_browser_shortcut)
             ShortcutExecutionType.SCRIPTING -> StringResLocalizable(R.string.subtitle_editor_toolbar_scripting_shortcut)
             ShortcutExecutionType.TRIGGER -> StringResLocalizable(R.string.subtitle_editor_toolbar_trigger_shortcut)
+            ShortcutExecutionType.MATRIX -> StringResLocalizable(R.string.subtitle_editor_toolbar_matrix_shortcut)
             else -> null
         }
 
@@ -224,6 +226,12 @@ class ShortcutEditorViewModel(
             if (shortcut.type == ShortcutExecutionType.BROWSER) {
                 if (!hasUrl()) {
                     StringResLocalizable(R.string.subtitle_basic_request_settings_url_only_prompt)
+                } else {
+                    shortcut.url.toLocalizable()
+                }
+            } else if (shortcut.type == ShortcutExecutionType.MATRIX) {
+                if (!hasUrl()) {
+                    StringResLocalizable(R.string.subtitle_basic_request_settings_matrix_url_prompt)
                 } else {
                     shortcut.url.toLocalizable()
                 }
@@ -348,6 +356,18 @@ class ShortcutEditorViewModel(
         }
         performOperation(
             temporaryShortcutRepository.setName(name)
+        )
+    }
+
+    fun onShortcutRoomChanged(room: String) {
+        if (!isInitialized || isSaving) {
+            return
+        }
+        updateViewState {
+            copy(shortcutRoom = room)
+        }
+        performOperation(
+            temporaryShortcutRepository.setRoom(room)
         )
     }
 

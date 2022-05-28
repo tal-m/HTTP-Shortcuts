@@ -576,6 +576,10 @@
     <string name="button_create_scripting_shortcut">Scripting Shortcut</string>
     <!-- Description for option in dialog to create new shortcut: create a scripting shortcut, i.e., a shortcut that will only run JavaScript code without making an HTTP request -->
     <string name="button_description_create_scripting_shortcut">Write JavaScript code for advanced workflows</string>
+    <!-- Option in dialog to create new shortcut: create a matrix shortcut, i.e., a shortcut that will send a message to a matrix room -->
+    <string name="button_create_matrix_shortcut">Matrix Shortcut</string>
+    <!-- Description for option in dialog to create new shortcut: create a matrix shortcut, i.e., a shortcut that will send a message to a matrix room  -->
+    <string name="button_description_create_matrix_shortcut">Send a message to a matrix room</string>
     <!-- Option in dialog to create new shortcut: create a multi shortcut, i.e., a shortcut that will trigger one or more other shortcuts -->
     <string name="button_create_trigger_shortcut">Multi-Shortcut</string>
     <!-- Description for option in dialog to create new shortcut: create a multi shortcut, i.e., a shortcut that will trigger one or more other shortcuts -->
@@ -780,10 +784,14 @@
     <string name="subtitle_editor_toolbar_scripting_shortcut">Scripting Shortcut</string>
     <!-- Subtitle: Shown in toolbar in shortcut editor to indicate that the current shortcut is a "Multi-Shortcut", i.e., one that only allows triggering one or more other shortcuts -->
     <string name="subtitle_editor_toolbar_trigger_shortcut">Multi-Shortcut</string>
+    <!-- Subtitle: Shown in toolbar in shortcut editor to indicate that the current shortcut is a "Matrix Shortcut" -->
+    <string name="subtitle_editor_toolbar_matrix_shortcut">Matrix Shortcut</string>
     <!-- Subtitle: Shown in shortcut editor underneath "Basic Settings" button when there is no URL yet -->
     <string name="subtitle_basic_request_settings_prompt">Set the shortcut\'s URL and HTTP method</string>
     <!-- Subtitle: Shown in shortcut editor underneath "Basic Settings" button when there is no URL yet and methods are not supported -->
     <string name="subtitle_basic_request_settings_url_only_prompt">Set the shortcut\'s URL</string>
+    <!-- Subtitle: Shown in shortcut editor underneath "Basic Settings" button when there is no URL yet and methods are not supported -->
+    <string name="subtitle_basic_request_settings_matrix_url_prompt">Set the shortcut\'s Matrix homeserver URL</string>
     <!-- Subtitle: Shown in shortcut editor underneath "Basic Settings". Pattern for Method and URL -->
     <string name="subtitle_basic_request_settings_pattern">%1$s %2$s</string>
     <!-- Section subtitle, shown in shortcut editor when the shortcut has no custom HTTP headers -->
@@ -1189,4 +1197,7 @@
     <string name="button_recover">Recover</string>
     <!-- Message displayed in notification while a shortcut is being executed that was triggered from Tasker -->
     <string name="running_tasker_plugin">Tasker is triggering a Shortcut</string>
+    <!-- Room for sent message (for matrix shortcuts). -->
+    <string name="label_matrix_room">Room</string>
+    <string name="label_matrix_room_instructions">Matrix room for sent message. Can be !roomid[:domain] (domain is optional) or #roomalias[:domain]</string>
 </resources>

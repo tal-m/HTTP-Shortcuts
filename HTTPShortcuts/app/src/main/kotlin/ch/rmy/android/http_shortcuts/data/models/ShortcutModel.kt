@@ -51,6 +51,9 @@ open class ShortcutModel(
 
     var timeout: Int = 10000
 
+    // Matrix room
+    var room: String = ""
+
     @Required
     private var retryPolicy: String = RETRY_POLICY_NONE
 
@@ -138,7 +141,8 @@ open class ShortcutModel(
             METHOD_PUT == method ||
             METHOD_DELETE == method ||
             METHOD_PATCH == method ||
-            METHOD_OPTIONS == method
+            METHOD_OPTIONS == method ||
+            ShortcutExecutionType.MATRIX == type
 
     fun usesRequestParameters() =
         allowsBody() &&
@@ -182,7 +186,8 @@ open class ShortcutModel(
             other.proxyPort != proxyPort ||
             other.wifiSsid != wifiSsid ||
             other.clientCert != clientCert ||
-            other.browserPackageName != browserPackageName
+            other.browserPackageName != browserPackageName ||
+            other.room != room
         ) {
             return false
         }

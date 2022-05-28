@@ -53,7 +53,7 @@ constructor(
                                     webView.evaluateJavascript(
                                         """
                                         document.getElementById('root').className = 'dark';
-                                    """
+                                        """
                                     ) {
                                         webView.isVisible = true
                                         loadingIndicator.isVisible = false

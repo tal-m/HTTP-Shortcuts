@@ -8,6 +8,7 @@ buildscript {
         classpath("io.realm:realm-gradle-plugin:10.8.1")
         classpath("com.bugsnag:bugsnag-android-gradle-plugin:7.2.0")
         classpath("org.jetbrains:markdown:0.2.1")
+
         classpath(kotlin("gradle-plugin", "1.6.21"))
     }
 }
@@ -21,7 +22,7 @@ ext {
     set("bugsnagAPIKey", System.getenv("BUGSNAG_API_KEY") ?: "")
     set("poeditorAPIKey", System.getenv("PO_EDITOR_API_KEY") ?: "")
     set("poeditorProjectId", System.getenv("PO_EDITOR_PROJECT_ID") ?: "")
-    set("buildTimestamp", java.util.Date().time.toString())
+    set("buildTimestamp", System.currentTimeMillis().toString())
 }
 
 allprojects {
@@ -41,10 +42,11 @@ allprojects {
             target(fileTree(".") {
                 include("**/*.kt")
             })
-            ktlint("0.43.2").userData(mapOf(
+            ktlint("0.44.0").userData(mapOf(
                 "max_line_length" to "150",
                 "indent_size" to "4",
                 "insert_final_newline" to "true",
+                "disabled_rules" to "no-wildcard-imports"
             ))
         }
     }
